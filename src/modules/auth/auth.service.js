@@ -57,6 +57,26 @@ async function register({ name, phone, email, password, roleName }) {
   };
 }
 
+/**
+ * Full profile for the session's user. The JWT only carries id + role, so a
+ * page reload would otherwise have no name/phone to render in the topbar
+ * without the client caching the login response indefinitely.
+ */
+async function getProfile(userId) {
+  const [rows] = await pool.query(
+    `SELECT u.id, u.name, u.phone, u.email, u.status, r.name AS roleName
+     FROM users u
+     JOIN roles r ON r.id = u.role_id
+     WHERE u.id = ?
+     LIMIT 1`,
+    [userId]
+  );
+  if (!rows[0]) {
+    throw ApiError.unauthorized('This account no longer exists');
+  }
+  return rows[0];
+}
+
 async function login({ phone, password }) {
   const user = await findUserByPhone(phone);
   if (!user) {
@@ -84,4 +104,4 @@ async function login({ phone, password }) {
   };
 }
 
-module.exports = { register, login };
+module.exports = { register, login, getProfile };

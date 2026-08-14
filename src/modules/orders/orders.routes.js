@@ -1,16 +1,25 @@
 const { Router } = require('express');
 const retailController = require('./retail.controller');
 const wholesaleController = require('./wholesale.controller');
-const { retailOrderValidation, wholesaleOrderValidation } = require('./orders.validation');
+const {
+  retailOrderValidation,
+  wholesaleOrderValidation,
+  orderIdParamValidation,
+  listOrdersValidation,
+} = require('./orders.validation');
 const { validate } = require('../../middlewares/validate.middleware');
 const { authenticate, authorize } = require('../../middlewares/auth.middleware');
+const { firmScope } = require('../../middlewares/firm.middleware');
 const { ROLES } = require('../../constants/roles');
 
 const router = Router();
 
+// Every order route is firm-scoped: a bill, its stock deduction and its bill
+// number all belong to exactly one firm's books.
+router.use(authenticate, firmScope);
+
 router.post(
   '/retail',
-  authenticate,
   authorize(ROLES.ADMIN, ROLES.CASHIER, ROLES.SALES_REP),
   retailOrderValidation,
   validate,
@@ -19,11 +28,29 @@ router.post(
 
 router.post(
   '/wholesale',
-  authenticate,
   authorize(ROLES.ADMIN, ROLES.SALES_REP),
   wholesaleOrderValidation,
   validate,
   wholesaleController.createWholesaleOrder
+);
+
+// Bill register. Declared before /:orderId so "register" is never parsed as an id.
+router.get(
+  '/',
+  authorize(ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER),
+  listOrdersValidation,
+  validate,
+  retailController.listOrders
+);
+
+// Printable bill payload (firm header + frozen lines + payments) — used for
+// print and reprint.
+router.get(
+  '/:orderId/invoice',
+  authorize(ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER),
+  orderIdParamValidation,
+  validate,
+  retailController.getInvoice
 );
 
 module.exports = router;

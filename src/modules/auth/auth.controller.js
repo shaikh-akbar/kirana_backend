@@ -13,7 +13,8 @@ const login = asyncHandler(async (req, res) => {
 });
 
 const me = asyncHandler(async (req, res) => {
-  return new ApiResponse(200, req.user, 'Current session').send(res);
+  const user = await authService.getProfile(req.user.id);
+  return new ApiResponse(200, user, 'Current session').send(res);
 });
 
 module.exports = { register, login, me };
