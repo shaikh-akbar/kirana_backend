@@ -14,7 +14,7 @@ const { ApiError } = require('../utils/ApiError');
  *   req.firm     - { id, firmName, firmType, firmRole }
  *
  * Membership is checked against `firm_users`, not against `firms.seller_id`,
- * so staff (CASHIER / SALES_REP) can be granted access to a firm without
+ * so staff (RETAILER / WHOLESALER) can be granted access to a firm without
  * being its owner. Creating a firm inserts the owner's membership row, so the
  * owner always passes this check too.
  */

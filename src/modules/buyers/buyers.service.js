@@ -6,7 +6,7 @@ const queries = require('./buyers.queries');
 /**
  * Buyers are customers, not staff, so their `users` row exists only to hold a
  * name and phone: it is created INACTIVE with an unusable password, which
- * `auth.service.login` rejects outright. Migration 002 adds the BUYER role for
+ * `auth.controller.login` rejects outright. Migration 002 adds the BUYER role for
  * the same reason — `users.role_id` is NOT NULL and every seeded role was a
  * staff role, so a dealer would otherwise have had to be filed as a cashier.
  */

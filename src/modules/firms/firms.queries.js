@@ -167,6 +167,26 @@ async function findRoleByName(db, roleName) {
   return rows[0] || null;
 }
 
+/** Looks up an existing user to grant firm access to — they must already have an account. */
+async function findUserByPhone(db, phone) {
+  const [rows] = await db.query('SELECT id, name, phone, status FROM users WHERE phone = ? LIMIT 1', [phone]);
+  return rows[0] || null;
+}
+
+/** Everyone with access to a firm, for the admin's staff-management screen. */
+async function listStaffForFirm(db, firmId) {
+  const [rows] = await db.query(
+    `SELECT u.id, u.name, u.phone, u.status, r.name AS roleName, fu.is_default AS isDefault
+     FROM firm_users fu
+     JOIN users u ON u.id = fu.user_id
+     JOIN roles r ON r.id = fu.role_id
+     WHERE fu.firm_id = ?
+     ORDER BY r.name ASC, u.name ASC`,
+    [firmId]
+  );
+  return rows;
+}
+
 module.exports = {
   getOrCreateSellerForUser,
   insertFirm,
@@ -177,4 +197,6 @@ module.exports = {
   updateFirm,
   findSellerIdForFirm,
   findRoleByName,
+  findUserByPhone,
+  listStaffForFirm,
 };

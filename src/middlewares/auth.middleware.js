@@ -3,7 +3,7 @@ const { ApiError } = require('../utils/ApiError');
 
 /**
  * Verifies the Bearer JWT and attaches { id, roleId, roleName } to req.user.
- * Tokens are issued by auth.service.js at login and carry the user's role
+ * Tokens are issued by auth.controller.js at login and carry the user's role
  * so downstream handlers/RBAC checks never need an extra DB round-trip.
  */
 function authenticate(req, res, next) {
@@ -24,7 +24,7 @@ function authenticate(req, res, next) {
 }
 
 /**
- * Role-based access control. Usage: authorize(ROLES.ADMIN, ROLES.CASHIER)
+ * Role-based access control. Usage: authorize(ROLES.ADMIN, ROLES.RETAILER)
  */
 function authorize(...allowedRoles) {
   return (req, res, next) => {

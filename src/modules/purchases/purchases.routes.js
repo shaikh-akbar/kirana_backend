@@ -10,7 +10,7 @@ const router = Router();
 
 router.use(authenticate, firmScope);
 
-const STAFF = [ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER];
+const STAFF = [ROLES.ADMIN, ROLES.WHOLESALER];
 
 router.get(
   '/',
@@ -30,10 +30,10 @@ router.get(
 router.get('/:id', authorize(...STAFF), [param('id').isInt({ min: 1 }).toInt()], validate, controller.getPurchase);
 
 // Posting a purchase creates stock and moves money owed, so it is not a
-// cashier's action.
+// retailer's action.
 router.post(
   '/',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   [
     body('supplierId').isInt({ min: 1 }).toInt(),
     body('invoiceNumber').isString().trim().notEmpty().isLength({ max: 50 }),

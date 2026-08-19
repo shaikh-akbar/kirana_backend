@@ -1,7 +1,8 @@
 const ROLES = Object.freeze({
   ADMIN: 'ADMIN',
-  SALES_REP: 'SALES_REP',
-  CASHIER: 'CASHIER',
+  WHOLESALER: 'WHOLESALER',
+  RETAILER: 'RETAILER',
+  BUYER: 'BUYER',
 });
 
 module.exports = { ROLES };

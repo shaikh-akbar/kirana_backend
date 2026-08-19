@@ -10,15 +10,15 @@ const router = Router();
 
 router.use(authenticate, firmScope);
 
-// Every figure here is one firm's books, so a cashier seeing the dashboard sees
+// Every figure here is one firm's books, so a retailer seeing the dashboard sees
 // only the firm they are rostered to — that is already enforced by firmScope.
-const STAFF = [ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER];
+const STAFF = [ROLES.ADMIN, ROLES.WHOLESALER];
 
 router.get('/dashboard', authorize(...STAFF), controller.getDashboard);
 
 router.get(
   '/sales',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   [
     query('fromDate').optional({ values: 'falsy' }).isISO8601({ strict: true }),
     query('toDate').optional({ values: 'falsy' }).isISO8601({ strict: true }),

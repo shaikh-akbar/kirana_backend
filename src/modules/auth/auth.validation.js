@@ -5,7 +5,7 @@ const registerValidation = [
   body('phone').isMobilePhone('any').withMessage('valid phone is required'),
   body('email').optional({ values: 'falsy' }).isEmail().withMessage('email must be valid'),
   body('password').isLength({ min: 6 }).withMessage('password must be at least 6 characters'),
-  body('roleName').isIn(['ADMIN', 'SALES_REP', 'CASHIER']).withMessage('invalid roleName'),
+  body('roleName').isIn(['ADMIN', 'WHOLESALER', 'RETAILER']).withMessage('invalid roleName'),
 ];
 
 const loginValidation = [
