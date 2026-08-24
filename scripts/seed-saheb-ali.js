@@ -101,7 +101,7 @@ async function findOrCreateOwner() {
     [OWNER.phone]
   );
   if (existing[0]) {
-    console.log(`  owner            reused #${existing[0].id} (${existing[0].name})`);
+    console.log(`  owner reused #${existing[0].id} (${existing[0].name})`);
     return existing[0].id;
   }
 

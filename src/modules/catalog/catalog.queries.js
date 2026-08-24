@@ -246,23 +246,64 @@ async function deactivateProduct(db, id) {
  * Suppliers
  * ------------------------------------------------------------------ */
 
-async function listSuppliers(db, { search } = {}) {
-  const params = [];
-  let where = '';
-  if (search) {
-    where = 'WHERE s.vendor_name LIKE ? OR s.phone LIKE ?';
-    params.push(`%${search}%`, `%${search}%`);
+async function listSuppliers(
+  db,
+  firmId,
+  { search, fromDate, toDate, limit = 50, offset = 0 } = {}
+) {
+  const joinParams = [firmId];
+  const searchParams = [];
+  const where = [];
+
+  if (fromDate) {
+    joinParams.push(fromDate);
   }
+  if (toDate) {
+    joinParams.push(toDate);
+  }
+
+  if (search) {
+    const like = `%${search}%`;
+    where.push('(s.vendor_name LIKE ? OR s.phone LIKE ? OR s.gstin LIKE ?)');
+    searchParams.push(like, like, like);
+  }
+
+  const purchaseDateFilter = [
+    'po.supplier_id = s.id',
+    'po.firm_id = ?',
+    fromDate ? 'po.purchase_date >= ?' : null,
+    toDate ? 'po.purchase_date <= ?' : null,
+  ]
+    .filter(Boolean)
+    .join(' AND ');
+
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
   const [rows] = await db.query(
     `SELECT s.id, s.vendor_name AS vendorName, s.phone, s.gstin, s.address,
-            s.current_balance AS currentBalance, s.created_at AS createdAt
+            s.current_balance AS currentBalance, s.created_at AS createdAt,
+            COUNT(DISTINCT po.id) AS purchaseCount,
+            COALESCE(SUM(poi.quantity), 0) AS totalQty,
+            COALESCE(SUM(poi.total_price), 0) AS totalAmount,
+            MAX(po.purchase_date) AS lastPurchaseDate
      FROM suppliers s
-     ${where}
-     ORDER BY s.vendor_name ASC`,
-    params
+     LEFT JOIN purchase_orders po ON ${purchaseDateFilter}
+     LEFT JOIN purchase_order_items poi ON poi.purchase_order_id = po.id
+     ${whereSql}
+     GROUP BY s.id, s.vendor_name, s.phone, s.gstin, s.address, s.current_balance, s.created_at
+     ORDER BY s.vendor_name ASC
+     LIMIT ? OFFSET ?`,
+    [...joinParams, ...searchParams, Number(limit), Number(offset)]
   );
-  return rows;
+
+  const [[{ total }]] = await db.query(
+    `SELECT COUNT(*) AS total
+     FROM suppliers s
+     ${whereSql}`,
+    searchParams
+  );
+
+  return { rows, total };
 }
 
 async function findSupplierById(db, id) {
