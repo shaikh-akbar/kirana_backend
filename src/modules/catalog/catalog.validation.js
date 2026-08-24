@@ -11,6 +11,14 @@ const listProductsValidation = [
   query('categoryId').optional({ values: 'falsy' }).isInt({ min: 1 }).toInt(),
 ];
 
+const listSuppliersValidation = [
+  query('search').optional({ values: 'falsy' }).isString().trim().isLength({ max: 100 }),
+  query('fromDate').optional({ values: 'falsy' }).isISO8601().withMessage('fromDate must be YYYY-MM-DD'),
+  query('toDate').optional({ values: 'falsy' }).isISO8601().withMessage('toDate must be YYYY-MM-DD'),
+  query('limit').optional().isInt({ min: 1, max: 200 }).toInt(),
+  query('offset').optional().isInt({ min: 0 }).toInt(),
+];
+
 const productUnitRules = (field) => [
   body(`${field}`).optional().isArray({ max: 10 }).withMessage('units must be an array'),
   body(`${field}.*.unitName`).isIn(UNIT_NAMES).withMessage(`unitName must be one of ${UNIT_NAMES.join(', ')}`),
@@ -83,6 +91,7 @@ module.exports = {
   UNIT_NAMES,
   idParam,
   listProductsValidation,
+  listSuppliersValidation,
   createProductValidation,
   updateProductValidation,
   createCategoryValidation,

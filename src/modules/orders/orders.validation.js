@@ -50,6 +50,9 @@ const orderIdParamValidation = [
 
 const listOrdersValidation = [
   query('channel').optional({ values: 'falsy' }).isIn(['RETAIL', 'WHOLESALE']),
+  query('search').optional({ values: 'falsy' }).isString().trim().isLength({ max: 100 }),
+  query('paymentStatus').optional({ values: 'falsy' }).isIn(['PAID', 'PARTIAL', 'UNPAID']),
+  query('orderStatus').optional({ values: 'falsy' }).isIn(['PENDING', 'COMPLETED', 'CANCELLED']),
   query('fromDate').optional({ values: 'falsy' }).isISO8601().withMessage('fromDate must be YYYY-MM-DD'),
   query('toDate').optional({ values: 'falsy' }).isISO8601().withMessage('toDate must be YYYY-MM-DD'),
   query('limit').optional().isInt({ min: 1, max: 200 }).toInt(),

@@ -252,8 +252,18 @@ async function deactivateProduct(id) {
  * Suppliers
  * ------------------------------------------------------------------ */
 
-async function listSuppliers(filters) {
-  return queries.listSuppliers(pool, filters);
+async function listSuppliers(firmId, filters) {
+  const { rows, total } = await queries.listSuppliers(pool, firmId, filters);
+  return {
+    rows: rows.map((row) => ({
+      ...row,
+      purchaseCount: Number(row.purchaseCount),
+      totalQty: Number(row.totalQty),
+      totalAmount: Number(row.totalAmount),
+      currentBalance: Number(row.currentBalance),
+    })),
+    total,
+  };
 }
 
 async function getSupplier(id) {

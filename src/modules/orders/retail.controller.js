@@ -18,8 +18,17 @@ const getInvoice = asyncHandler(async (req, res) => {
 });
 
 const listOrders = asyncHandler(async (req, res) => {
-  const { channel, fromDate, toDate, limit, offset } = req.query;
-  const result = await retailService.listOrders(req.firmId, { channel, fromDate, toDate, limit, offset });
+  const { channel, search, paymentStatus, orderStatus, fromDate, toDate, limit, offset } = req.query;
+  const result = await retailService.listOrders(req.firmId, {
+    channel,
+    search,
+    paymentStatus,
+    orderStatus,
+    fromDate,
+    toDate,
+    limit,
+    offset,
+  });
   return new ApiResponse(200, result, 'Bill register').send(res);
 });
 

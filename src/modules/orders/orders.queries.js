@@ -331,13 +331,30 @@ async function getInvoice(db, firmId, orderId) {
 }
 
 /** Paginated bill register for a firm, newest bill first. */
-async function listOrders(db, firmId, { channel, fromDate, toDate, limit = 50, offset = 0 } = {}) {
+async function listOrders(
+  db,
+  firmId,
+  { channel, search, paymentStatus, orderStatus, fromDate, toDate, limit = 50, offset = 0 } = {}
+) {
   const where = ['o.firm_id = ?'];
   const params = [firmId];
 
   if (channel) {
     where.push('o.channel = ?');
     params.push(channel);
+  }
+  if (search) {
+    const like = `%${search}%`;
+    where.push('(o.bill_number LIKE ? OR o.order_number LIKE ? OR o.customer_name LIKE ? OR o.customer_phone LIKE ?)');
+    params.push(like, like, like, like);
+  }
+  if (paymentStatus) {
+    where.push('o.payment_status = ?');
+    params.push(paymentStatus);
+  }
+  if (orderStatus) {
+    where.push('o.order_status = ?');
+    params.push(orderStatus);
   }
   if (fromDate) {
     where.push('o.bill_date >= ?');
@@ -349,8 +366,10 @@ async function listOrders(db, firmId, { channel, fromDate, toDate, limit = 50, o
   }
 
   const [rows] = await db.query(
-    `SELECT o.id, o.bill_number AS billNumber, o.bill_date AS billDate, o.channel,
-            o.customer_name AS customerName, o.item_count AS itemCount,
+    `SELECT o.id, o.order_number AS orderNumber, o.bill_number AS billNumber,
+            o.bill_date AS billDate, o.channel,
+            o.buyer_id AS buyerId, o.customer_name AS customerName,
+            o.customer_phone AS customerPhone, o.item_count AS itemCount,
             o.total_quantity AS totalQuantity, o.net_amount AS netAmount,
             o.payment_status AS paymentStatus, o.order_status AS orderStatus
      FROM orders o

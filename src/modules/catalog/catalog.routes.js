@@ -87,9 +87,15 @@ productsRouter.delete(
 /* ------------------------------------------------------------------ */
 
 const suppliersRouter = Router();
-suppliersRouter.use(authenticate);
+suppliersRouter.use(authenticate, firmScope);
 
-suppliersRouter.get('/', authorize(...STAFF), controller.listSuppliers);
+suppliersRouter.get(
+  '/',
+  authorize(...STAFF),
+  validation.listSuppliersValidation,
+  validate,
+  controller.listSuppliers
+);
 suppliersRouter.get('/:id', authorize(...STAFF), validation.idParam, validate, controller.getSupplier);
 
 suppliersRouter.post(

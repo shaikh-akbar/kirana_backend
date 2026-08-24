@@ -54,7 +54,13 @@ const deactivateProduct = asyncHandler(async (req, res) => {
 /* Suppliers */
 
 const listSuppliers = asyncHandler(async (req, res) => {
-  const suppliers = await catalogService.listSuppliers({ search: req.query.search });
+  const suppliers = await catalogService.listSuppliers(req.firmId, {
+    search: req.query.search,
+    fromDate: req.query.fromDate,
+    toDate: req.query.toDate,
+    limit: req.query.limit,
+    offset: req.query.offset,
+  });
   return new ApiResponse(200, suppliers, 'Suppliers fetched').send(res);
 });
 
