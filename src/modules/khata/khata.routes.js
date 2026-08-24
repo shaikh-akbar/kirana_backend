@@ -13,13 +13,13 @@ router.use(authenticate, firmScope);
 
 router.get(
   '/',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   controller.listLedgers
 );
 
 router.post(
   '/payment',
-  authorize(ROLES.ADMIN, ROLES.CASHIER),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   recordPaymentValidation,
   validate,
   controller.recordPayment
@@ -28,7 +28,7 @@ router.post(
 // Declared last so a literal path segment is never swallowed by :buyerId.
 router.get(
   '/:buyerId',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   buyerIdParamValidation,
   validate,
   controller.getLedger

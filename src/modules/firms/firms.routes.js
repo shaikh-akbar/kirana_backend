@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const controller = require('./firms.controller');
-const { createFirmValidation, updateFirmValidation } = require('./firms.validation');
+const { createFirmValidation, updateFirmValidation, addStaffValidation } = require('./firms.validation');
 const { validate } = require('../../middlewares/validate.middleware');
 const { authenticate, authorize } = require('../../middlewares/auth.middleware');
 const { firmScope } = require('../../middlewares/firm.middleware');
@@ -30,6 +30,24 @@ router.patch(
   updateFirmValidation,
   validate,
   controller.updateActiveFirm
+);
+
+// GET /api/firms/active/staff — everyone with access to the active firm.
+// ADMIN-only: staff shouldn't see who else has access, just the owner.
+router.get('/active/staff', authenticate, firmScope, authorize(ROLES.ADMIN), controller.listStaff);
+
+// POST /api/firms/active/staff — grants an EXISTING user (found by phone)
+// RETAILER/WHOLESALER access to the active firm. This is the only way a
+// staff account ends up with a firm to log into; ADMIN-only on purpose,
+// since deciding who works at the firm is the owner's call.
+router.post(
+  '/active/staff',
+  authenticate,
+  firmScope,
+  authorize(ROLES.ADMIN),
+  addStaffValidation,
+  validate,
+  controller.addStaff
 );
 
 module.exports = router;

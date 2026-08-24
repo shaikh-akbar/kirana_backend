@@ -11,7 +11,7 @@ const router = Router();
 // Stock belongs to a firm's godown, so every read here is firm-scoped.
 router.use(authenticate, firmScope);
 
-const STAFF = [ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER];
+const STAFF = [ROLES.ADMIN, ROLES.WHOLESALER, ROLES.RETAILER];
 
 router.get('/low-stock', authorize(...STAFF), controller.getLowStock);
 
@@ -39,13 +39,13 @@ router.get(
 );
 
 /**
- * Opening stock, recounts and write-offs. Restricted to ADMIN and SALES_REP:
+ * Opening stock, recounts and write-offs. Restricted to ADMIN and WHOLESALER:
  * this is the one write that can conjure stock out of nothing, so it must not
  * sit behind the same role that merely rings up sales.
  */
 router.post(
   '/adjust',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   [
     body('productId').isInt({ min: 1 }).toInt(),
     body('quantity').isFloat().toFloat().custom((value) => {

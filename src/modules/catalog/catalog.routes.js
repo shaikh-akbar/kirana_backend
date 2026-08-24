@@ -11,12 +11,17 @@ const { ROLES } = require('../../constants/roles');
  * shared catalog, edited from the same screens, and share the query file.
  * They are mounted under separate paths in routes/index.js.
  *
- * Only ADMIN may write the catalog — a cashier keying in a new product would
+ * Only ADMIN may write the catalog — a retailer keying in a new product would
  * quietly change what every firm under the owner sells. Reads are open to all
  * staff, since POS and stock screens need them.
  */
 
-const STAFF = [ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER];
+const STAFF = [ROLES.ADMIN, ROLES.WHOLESALER];
+
+// RETAILER manages no catalog data and can't see the Categories/Suppliers
+// screens, but POS Billing reads the product list to bill against — without
+// this, a retailer could never load anything to sell.
+const PRODUCT_READERS = [...STAFF, ROLES.RETAILER];
 
 /* ------------------------------------------------------------------ */
 
@@ -50,13 +55,13 @@ productsRouter.use(authenticate, firmScope);
 
 productsRouter.get(
   '/',
-  authorize(...STAFF),
+  authorize(...PRODUCT_READERS),
   validation.listProductsValidation,
   validate,
   controller.listProducts
 );
 
-productsRouter.get('/:id', authorize(...STAFF), validation.idParam, validate, controller.getProduct);
+productsRouter.get('/:id', authorize(...PRODUCT_READERS), validation.idParam, validate, controller.getProduct);
 
 productsRouter.post(
   '/',
@@ -100,7 +105,7 @@ suppliersRouter.get('/:id', authorize(...STAFF), validation.idParam, validate, c
 
 suppliersRouter.post(
   '/',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   validation.createSupplierValidation,
   validate,
   controller.createSupplier
@@ -108,7 +113,7 @@ suppliersRouter.post(
 
 suppliersRouter.patch(
   '/:id',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   validation.updateSupplierValidation,
   validate,
   controller.updateSupplier

@@ -12,7 +12,7 @@ const router = Router();
 // firm, so the whole module is firm-scoped.
 router.use(authenticate, firmScope);
 
-const STAFF = [ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER];
+const STAFF = [ROLES.ADMIN, ROLES.WHOLESALER];
 
 router.get(
   '/',
@@ -27,11 +27,11 @@ router.get(
 
 router.get('/:id', authorize(...STAFF), [param('id').isInt({ min: 1 }).toInt()], validate, controller.getBuyer);
 
-// A cashier rings up walk-in cash sales; opening a credit account is a
-// commitment of the firm's money, so it stays with ADMIN and SALES_REP.
+// A retailer rings up walk-in cash sales; opening a credit account is a
+// commitment of the firm's money, so it stays with ADMIN and WHOLESALER.
 router.post(
   '/',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   [
     body('name').isString().trim().notEmpty().isLength({ max: 100 }),
     body('phone').isString().trim().notEmpty().isLength({ max: 15 }),
@@ -48,7 +48,7 @@ router.post(
 
 router.patch(
   '/:id',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   [
     param('id').isInt({ min: 1 }).toInt(),
     body('name').optional().isString().trim().notEmpty().isLength({ max: 100 }),

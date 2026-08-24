@@ -85,4 +85,12 @@ const updateFirmValidation = [
   ...invoiceSettingFields,
 ];
 
-module.exports = { createFirmValidation, updateFirmValidation };
+// Only WHOLESALER/RETAILER on purpose: granting ADMIN is a more sensitive
+// action than day-to-day staff onboarding, so it stays out of this quick
+// add-by-phone flow.
+const addStaffValidation = [
+  body('phone').isString().trim().notEmpty().withMessage('phone is required'),
+  body('roleName').isIn(['WHOLESALER', 'RETAILER']).withMessage('roleName must be WHOLESALER or RETAILER'),
+];
+
+module.exports = { createFirmValidation, updateFirmValidation, addStaffValidation };

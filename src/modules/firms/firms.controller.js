@@ -26,4 +26,14 @@ const updateActiveFirm = asyncHandler(async (req, res) => {
   return new ApiResponse(200, firm, 'Firm updated').send(res);
 });
 
-module.exports = { createFirm, listMyFirms, getActiveFirm, updateActiveFirm };
+const addStaff = asyncHandler(async (req, res) => {
+  const staff = await firmsService.addStaff(req.firmId, req.body);
+  return new ApiResponse(201, staff, 'Staff member added').send(res);
+});
+
+const listStaff = asyncHandler(async (req, res) => {
+  const staff = await firmsService.listStaff(req.firmId);
+  return new ApiResponse(200, staff, 'Staff with access to this firm').send(res);
+});
+
+module.exports = { createFirm, listMyFirms, getActiveFirm, updateActiveFirm, addStaff, listStaff };

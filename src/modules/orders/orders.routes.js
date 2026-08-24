@@ -20,7 +20,7 @@ router.use(authenticate, firmScope);
 
 router.post(
   '/retail',
-  authorize(ROLES.ADMIN, ROLES.CASHIER, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.RETAILER, ROLES.WHOLESALER),
   retailOrderValidation,
   validate,
   retailController.createRetailOrder
@@ -28,7 +28,7 @@ router.post(
 
 router.post(
   '/wholesale',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   wholesaleOrderValidation,
   validate,
   wholesaleController.createWholesaleOrder
@@ -37,7 +37,7 @@ router.post(
 // Bill register. Declared before /:orderId so "register" is never parsed as an id.
 router.get(
   '/',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER, ROLES.RETAILER),
   listOrdersValidation,
   validate,
   retailController.listOrders
@@ -47,7 +47,7 @@ router.get(
 // print and reprint.
 router.get(
   '/:orderId/invoice',
-  authorize(ROLES.ADMIN, ROLES.SALES_REP, ROLES.CASHIER),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER, ROLES.RETAILER),
   orderIdParamValidation,
   validate,
   retailController.getInvoice

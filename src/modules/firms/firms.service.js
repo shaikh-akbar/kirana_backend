@@ -119,6 +119,51 @@ async function listMyFirms(userId) {
   return queries.listFirmsForUser(pool, userId);
 }
 
+/**
+ * Grants an existing user access to a firm as staff. This is the only way a
+ * RETAILER/WHOLESALER account ends up with a `firm_users` row — self-service
+ * signup only creates the user, not a firm membership, so without this call
+ * they would have no firm and the frontend would have nowhere to send them
+ * but the "create a firm" onboarding screen meant for a new owner.
+ *
+ * Re-running this for a user who is already a member updates their role
+ * instead of failing — `insertFirmUser`'s upsert makes "add" and "change this
+ * person's role" the same call.
+ */
+async function addStaff(firmId, input) {
+  return withTransaction(async (conn) => {
+    const role = await queries.findRoleByName(conn, input.roleName);
+    if (!role) {
+      throw ApiError.badRequest(`Unknown role '${input.roleName}'`);
+    }
+
+    const user = await queries.findUserByPhone(conn, input.phone);
+    if (!user) {
+      throw ApiError.notFound(`No user registered with phone ${input.phone} — they must register first`);
+    }
+    if (user.status !== 'ACTIVE') {
+      throw ApiError.badRequest(`${user.name}'s account is not active`);
+    }
+
+    const existingFirms = await queries.listFirmsForUser(conn, user.id);
+
+    await queries.insertFirmUser(conn, {
+      firmId,
+      userId: user.id,
+      roleId: role.id,
+      // First firm this user has ever been added to becomes their default,
+      // same rule createFirm uses for a brand-new owner.
+      isDefault: existingFirms.length === 0,
+    });
+
+    return { id: user.id, name: user.name, phone: user.phone, roleName: role.name };
+  });
+}
+
+async function listStaff(firmId) {
+  return queries.listStaffForFirm(pool, firmId);
+}
+
 /** Read a single firm. firmScope has already proven the caller's access. */
 async function getFirm(firmId) {
   const firm = await queries.findFirmById(pool, firmId);
@@ -157,5 +202,7 @@ module.exports = {
   listMyFirms,
   getFirm,
   updateFirmDetails,
+  addStaff,
+  listStaff,
   DEFAULT_INVOICE_FOOTER,
 };
