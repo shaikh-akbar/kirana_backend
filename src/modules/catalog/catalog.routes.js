@@ -32,7 +32,7 @@ categoriesRouter.get('/', authorize(...STAFF), controller.listCategories);
 
 categoriesRouter.post(
   '/',
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   validation.createCategoryValidation,
   validate,
   controller.createCategory
@@ -65,7 +65,7 @@ productsRouter.get('/:id', authorize(...PRODUCT_READERS), validation.idParam, va
 
 productsRouter.post(
   '/',
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.WHOLESALER),
   validation.createProductValidation,
   validate,
   controller.createProduct
